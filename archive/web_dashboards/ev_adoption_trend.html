@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV Adoption Trend Analysis - Helsinki, Tampere, Oulu</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #1a1a1a;
+      background: #f4f6f8; padding: 28px 16px;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .card {
+      background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      padding: 24px 28px; margin-bottom: 24px;
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    h2 { font-size: 17px; margin: 0 0 4px; }
+    p.sub { margin: 0 0 16px; color: #555; font-size: 13px; }
+    .chart-wrap { position: relative; height: 440px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 8px; }
+    th, td { border: 1px solid #e2e6ea; padding: 5px 8px; text-align: right; }
+    th { background: #f0f3f6; }
+    td:first-child, th:first-child { text-align: left; }
+    .controls { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+    .note { font-size: 12px; color: #92400e; background: #fef3c7; border-radius: 8px; padding: 8px 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Electric Vehicle Adoption Trend Analysis</h1>
+    <p class="sub">Helsinki, Tampere &amp; Oulu &middot; Passenger cars in traffic by year of first registration &middot; Source: Traficom (kanta_010, updated 2026-07-07)</p>
+    <p class="sub" style="color:#1a1a1a">
+      <strong>Annual EV Additions</strong> = BEV (Electricity) + Petrol PHEV + Diesel PHEV.
+      <strong>Cumulative EV Fleet</strong> in year <em>t</em> = sum of annual additions from 2010 through <em>t</em>.
+    </p>
+    <div class="note">Note: analysis covers 2010–2025. The 2026 data was excluded because it is incomplete (dataset last updated 2026-07-07).</div>
+  </div>
+
+  <div class="card">
+    <h2>Annual EV Additions by City (2010–2025)</h2>
+    <p class="sub">New BEV + PHEV passenger cars registered each year.</p>
+    <div class="chart-wrap"><canvas id="annualChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h2>Cumulative EV Fleet by City (2010–2025)</h2>
+    <p class="sub">Running total of EV registrations since 2010.</p>
+    <div class="chart-wrap"><canvas id="cumChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h2>Data Table</h2>
+    <div id="tableHost"></div>
+    <div class="controls">
+      <button id="dlAnnual">Download Annual chart PNG</button>
+      <button id="dlCum">Download Cumulative chart PNG</button>
+      <button id="dlCsv" class="secondary">Download CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Raw data: [BEV (Electricity), Petrol PHEV, Diesel PHEV] per year
+  const years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+  const raw = {
+    Helsinki: [[1,0,0],[1,0,0],[3,48,1],[9,85,40],[40,126,22],[37,370,21],[76,639,33],[129,1087,28],[217,1342,30],[624,1418,53],[1252,3294,178],[2930,4208,143],[4229,3180,87],[6592,4008,52],[5368,3021,51],[6410,2683,21]],
+    Tampere:  [[0,0,0],[3,1,0],[4,31,0],[9,55,21],[16,53,16],[32,175,11],[52,273,14],[72,421,10],[120,518,11],[289,480,28],[528,1281,64],[1073,1377,56],[1415,925,21],[1587,798,15],[1049,616,19],[1137,582,10]],
+    Oulu:     [[0,0,0],[2,0,0],[4,24,0],[9,31,23],[14,41,13],[22,111,9],[31,212,15],[71,311,25],[108,387,9],[275,451,20],[505,1026,72],[926,1058,60],[1219,648,24],[1297,584,14],[910,426,13],[925,448,10]],
+  };
+  const cityColors = { Helsinki: "#2563eb", Tampere: "#ef4444", Oulu: "#10b981" };
+
+  const annual = {}, cumulative = {};
+  Object.keys(raw).forEach(city => {
+    let run = 0;
+    annual[city] = raw[city].map(r => r[0] + r[1] + r[2]);
+    cumulative[city] = annual[city].map(v => (run += v));
+  });
+
+  function lineChart(canvasId, dataMap, yTitle) {
+    return new Chart(document.getElementById(canvasId), {
+      type: "line",
+      data: {
+        labels: years,
+        datasets: Object.keys(dataMap).map(city => ({
+          label: city,
+          data: dataMap[city],
+          borderColor: cityColors[city],
+          backgroundColor: cityColors[city] + "22",
+          borderWidth: 2.5, tension: 0.25, pointRadius: 3, pointHoverRadius: 5, fill: false,
+        })),
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { position: "top", labels: { usePointStyle: true, font: { size: 13 } } },
+          tooltip: { callbacks: { label: c => c.dataset.label + ": " + c.parsed.y.toLocaleString() } },
+        },
+        scales: {
+          x: { grid: { display: false }, title: { display: true, text: "Year of first registration" } },
+          y: { beginAtZero: true, title: { display: true, text: yTitle }, grid: { color: "rgba(0,0,0,.06)" } },
+        },
+      },
+    });
+  }
+
+  const annualChart = lineChart("annualChart", annual, "Annual EV additions");
+  const cumChart = lineChart("cumChart", cumulative, "Cumulative EV fleet");
+
+  // Build table
+  const cities = Object.keys(raw);
+  let html = "<table><thead><tr><th>Year</th>";
+  cities.forEach(c => html += `<th>${c} added</th>`);
+  cities.forEach(c => html += `<th>${c} cumulative</th>`);
+  html += "</tr></thead><tbody>";
+  years.forEach((y, i) => {
+    html += `<tr><td>${y}</td>`;
+    cities.forEach(c => html += `<td>${annual[c][i].toLocaleString()}</td>`);
+    cities.forEach(c => html += `<td>${cumulative[c][i].toLocaleString()}</td>`);
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  document.getElementById("tableHost").innerHTML = html;
+
+  function downloadChart(chart, name) {
+    const src = chart.canvas, tmp = document.createElement("canvas");
+    tmp.width = src.width; tmp.height = src.height;
+    const c = tmp.getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0,0,tmp.width,tmp.height); c.drawImage(src,0,0);
+    const a = document.createElement("a"); a.download = name; a.href = tmp.toDataURL("image/png"); a.click();
+  }
+  document.getElementById("dlAnnual").onclick = () => downloadChart(annualChart, "annual_ev_additions.png");
+  document.getElementById("dlCum").onclick = () => downloadChart(cumChart, "cumulative_ev_fleet.png");
+  document.getElementById("dlCsv").onclick = () => {
+    let rows = ["Year," + cities.map(c=>c+" BEV").join(",") + "," + cities.map(c=>c+" Added").join(",") + "," + cities.map(c=>c+" Cumulative").join(",")];
+    years.forEach((y,i) => {
+      const bev = cities.map(c => raw[c][i][0]);
+      const add = cities.map(c => annual[c][i]);
+      const cum = cities.map(c => cumulative[c][i]);
+      rows.push([y, ...bev, ...add, ...cum].join(","));
+    });
+    const blob = new Blob([rows.join("\n")], {type:"text/csv"});
+    const a = document.createElement("a"); a.download = "ev_adoption_analysis.csv"; a.href = URL.createObjectURL(blob); a.click();
+  };
+
+  window.__charts = { annualChart, cumChart };
+</script>
+</body>
+</html>

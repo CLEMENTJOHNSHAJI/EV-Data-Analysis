@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cumulative EV Fleet - Annual Growth Rate</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #1a1a1a; background: #f4f6f8; padding: 28px 16px; }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08); padding: 24px 28px; margin-bottom: 24px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    h2 { font-size: 17px; margin: 0 0 4px; }
+    p.sub { margin: 0 0 16px; color: #555; font-size: 13px; }
+    .chart-wrap { position: relative; height: 460px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 8px; }
+    th, td { border: 1px solid #e2e6ea; padding: 5px 8px; text-align: right; }
+    th { background: #f0f3f6; }
+    td:first-child, th:first-child { text-align: left; }
+    .controls { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+    .note { font-size: 12px; color: #92400e; background: #fef3c7; border-radius: 8px; padding: 8px 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Cumulative EV Fleet &mdash; Annual Growth Rate</h1>
+    <p class="sub">Helsinki, Tampere &amp; Oulu &middot; Source: Traficom (kanta_010) &middot; Passenger cars in traffic by year of first registration</p>
+    <p class="sub" style="color:#1a1a1a">
+      <strong>Annual Growth Rate</strong> = (Cumulative EV Fleet<sub>year</sub> &minus; Cumulative EV Fleet<sub>year-1</sub>) / Cumulative EV Fleet<sub>year-1</sub> &times; 100.
+      Cumulative fleet = running sum of annual EV additions (BEV + Petrol PHEV + Diesel PHEV) from 2010.
+    </p>
+    <div class="note">The chart starts at 2013. Growth rates for 2011&ndash;2012 are omitted from the trend because the fleet was near zero then (e.g. Tampere/Oulu had 0&ndash;4 vehicles), which makes the percentage change explode (hundreds to thousands of %) and not comparable. Those values are still listed in the table below.</div>
+  </div>
+
+  <div class="card">
+    <h2>Annual Growth Rate of Cumulative EV Fleet (2013&ndash;2025)</h2>
+    <p class="sub">Year-over-year percentage growth of the surviving EV fleet.</p>
+    <div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+    <div class="controls">
+      <button id="toggleRange" class="secondary">Include 2012</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Data Table</h2>
+    <div id="tableHost"></div>
+    <div class="controls">
+      <button id="dlGrowth">Download chart PNG</button>
+      <button id="dlCsv" class="secondary">Download CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+  const raw = {
+    Helsinki: [[1,0,0],[1,0,0],[3,48,1],[9,85,40],[40,126,22],[37,370,21],[76,639,33],[129,1087,28],[217,1342,30],[624,1418,53],[1252,3294,178],[2930,4208,143],[4229,3180,87],[6592,4008,52],[5368,3021,51],[6410,2683,21]],
+    Tampere:  [[0,0,0],[3,1,0],[4,31,0],[9,55,21],[16,53,16],[32,175,11],[52,273,14],[72,421,10],[120,518,11],[289,480,28],[528,1281,64],[1073,1377,56],[1415,925,21],[1587,798,15],[1049,616,19],[1137,582,10]],
+    Oulu:     [[0,0,0],[2,0,0],[4,24,0],[9,31,23],[14,41,13],[22,111,9],[31,212,15],[71,311,25],[108,387,9],[275,451,20],[505,1026,72],[926,1058,60],[1219,648,24],[1297,584,14],[910,426,13],[925,448,10]],
+  };
+  const cityColors = { Helsinki: "#2563eb", Tampere: "#ef4444", Oulu: "#10b981" };
+  const cities = Object.keys(raw);
+
+  const cumulative = {}, growth = {};
+  cities.forEach(city => {
+    let run = 0;
+    cumulative[city] = raw[city].map(r => (run += r[0] + r[1] + r[2]));
+    growth[city] = cumulative[city].map((v, i) => {
+      if (i === 0) return null;
+      const prev = cumulative[city][i - 1];
+      return prev === 0 ? null : ((v - prev) / prev) * 100;
+    });
+  });
+
+  let startYear = 2013;
+
+  function buildChart() {
+    const idx = years.indexOf(startYear);
+    const labels = years.slice(idx);
+    return {
+      labels,
+      datasets: cities.map(city => ({
+        label: city,
+        data: growth[city].slice(idx),
+        borderColor: cityColors[city],
+        backgroundColor: cityColors[city] + "22",
+        borderWidth: 2.5, tension: 0.25, pointRadius: 3, pointHoverRadius: 5, fill: false, spanGaps: true,
+      })),
+    };
+  }
+
+  const chart = new Chart(document.getElementById("growthChart"), {
+    type: "line",
+    data: buildChart(),
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "top", labels: { usePointStyle: true, font: { size: 13 } } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ": " + (c.parsed.y == null ? "n/a" : c.parsed.y.toFixed(1) + " %") } },
+      },
+      scales: {
+        x: { grid: { display: false }, title: { display: true, text: "Year" } },
+        y: { beginAtZero: true, title: { display: true, text: "Annual growth rate (%)" }, grid: { color: "rgba(0,0,0,.06)" }, ticks: { callback: v => v + " %" } },
+      },
+    },
+  });
+
+  document.getElementById("toggleRange").onclick = (e) => {
+    startYear = startYear === 2013 ? 2012 : 2013;
+    e.target.textContent = startYear === 2013 ? "Include 2012" : "Show from 2013";
+    chart.data = buildChart();
+    chart.update();
+  };
+
+  // Table (full range)
+  let html = "<table><thead><tr><th>Year</th>";
+  cities.forEach(c => html += `<th>${c} fleet</th>`);
+  cities.forEach(c => html += `<th>${c} growth %</th>`);
+  html += "</tr></thead><tbody>";
+  years.forEach((y, i) => {
+    html += `<tr><td>${y}</td>`;
+    cities.forEach(c => html += `<td>${cumulative[c][i].toLocaleString()}</td>`);
+    cities.forEach(c => html += `<td>${growth[c][i] == null ? "&ndash;" : growth[c][i].toFixed(1)}</td>`);
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  document.getElementById("tableHost").innerHTML = html;
+
+  document.getElementById("dlGrowth").onclick = () => {
+    const src = chart.canvas, tmp = document.createElement("canvas");
+    tmp.width = src.width; tmp.height = src.height;
+    const c = tmp.getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0,0,tmp.width,tmp.height); c.drawImage(src,0,0);
+    const a = document.createElement("a"); a.download = "ev_fleet_growth_rate.png"; a.href = tmp.toDataURL("image/png"); a.click();
+  };
+  document.getElementById("dlCsv").onclick = () => {
+    let rows = ["Year," + cities.map(c=>c+" Cumulative Fleet").join(",") + "," + cities.map(c=>c+" Growth %").join(",")];
+    years.forEach((y,i) => {
+      const cum = cities.map(c => cumulative[c][i]);
+      const g = cities.map(c => growth[c][i] == null ? "" : growth[c][i].toFixed(1));
+      rows.push([y, ...cum, ...g].join(","));
+    });
+    const blob = new Blob([rows.join("\n")], {type:"text/csv"});
+    const a = document.createElement("a"); a.download = "ev_fleet_growth_rate.csv"; a.href = URL.createObjectURL(blob); a.click();
+  };
+
+  window.__charts = { growthChart: chart };
+</script>
+</body>
+</html>

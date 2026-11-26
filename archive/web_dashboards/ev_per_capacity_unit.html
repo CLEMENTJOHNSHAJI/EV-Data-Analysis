@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EVs per Infrastructure Capacity Unit</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #1a1a1a; background: #f4f6f8; padding: 28px 16px; }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08); padding: 24px 28px; margin-bottom: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 0 0 4px; }
+    p.sub { margin: 0 0 14px; color: #555; font-size: 13px; }
+    .chart-wrap { position: relative; height: 380px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 12px; }
+    th, td { border: 1px solid #e2e6ea; padding: 6px 8px; text-align: right; }
+    th { background: #f0f3f6; }
+    td:first-child, th:first-child { text-align: left; }
+    .note { font-size: 12px; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+    .controls { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>EVs per Infrastructure Capacity Unit</h1>
+    <p class="sub">
+      <strong>ICS</strong> = Type 2 + (3 × CHAdeMO) + (5 × CCS) &nbsp;|&nbsp;
+      <strong>EVs per Capacity Unit</strong> = Total EV Fleet / ICS &nbsp;|&nbsp;
+      Lower value = better infrastructure availability
+    </p>
+    <div class="note">
+      <strong>Recommended diagram types:</strong>
+      (1) <strong>Stacked bar chart</strong> to show how weighted charger types build the ICS;
+      (2) <strong>Horizontal bar chart</strong> to compare the final EVs-per-capacity-unit ratio across cities.
+      Together, these make both the calculation logic and the final comparison easy to understand.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>A. Weighted Infrastructure Capacity Score (ICS)</h2>
+    <p class="sub">Stacked contributions from Type 2 (×1), CHAdeMO (×3), and CCS Fast (×5).</p>
+    <div class="chart-wrap"><canvas id="icsChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h2>B. EVs per Infrastructure Capacity Unit</h2>
+    <p class="sub">Total EV fleet divided by ICS. Lower bars indicate more favourable charging availability.</p>
+    <div class="chart-wrap"><canvas id="ratioChart"></canvas></div>
+    <table>
+      <thead>
+        <tr><th>City</th><th>Total EV Fleet</th><th>ICS</th><th>Calculation</th><th>EVs per Capacity Unit</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Helsinki</td><td>58,516</td><td>4,765</td><td>58,516 / 4,765</td><td>12.28</td></tr>
+        <tr><td>Tampere</td><td>16,258</td><td>2,040</td><td>16,258 / 2,040</td><td>7.97</td></tr>
+        <tr><td>Oulu</td><td>13,037</td><td>1,089</td><td>13,037 / 1,089</td><td>11.97</td></tr>
+      </tbody>
+    </table>
+    <div class="controls">
+      <button id="dlIcs">Download ICS chart PNG</button>
+      <button id="dlRatio" class="secondary">Download ratio chart PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cities = ["Helsinki", "Tampere", "Oulu"];
+  const type2w = [2690, 975, 377];
+  const chadw  = [120, 30, 42];
+  const ccsw   = [1955, 1035, 670];
+  const ics    = [4765, 2040, 1089];
+  const ratio  = [12.28, 7.97, 11.97];
+  const ratioColors = ["#dc2626", "#16a34a", "#ea580c"];
+
+  const icsChart = new Chart(document.getElementById("icsChart"), {
+    type: "bar",
+    data: {
+      labels: cities,
+      datasets: [
+        { label: "Type 2 (×1)", data: type2w, backgroundColor: "#2563eb", stack: "ics", borderRadius: 2 },
+        { label: "CHAdeMO (×3)", data: chadw, backgroundColor: "#f59e0b", stack: "ics", borderRadius: 2 },
+        { label: "CCS Fast (×5)", data: ccsw, backgroundColor: "#10b981", stack: "ics", borderRadius: 2 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { position: "top", labels: { usePointStyle: true } },
+        tooltip: { callbacks: { footer: (items) => "ICS = " + ics[items[0].dataIndex].toLocaleString() } },
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, title: { display: true, text: "City" } },
+        y: { stacked: true, beginAtZero: true, title: { display: true, text: "Weighted capacity score" }, grid: { color: "rgba(0,0,0,.06)" } },
+      },
+    },
+    plugins: [{
+      id: "icsTotals",
+      afterDatasetsDraw(c) {
+        const { ctx } = c; ctx.save(); ctx.font = "600 11px Segoe UI, Arial"; ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
+        cities.forEach((_, i) => {
+          const meta = c.getDatasetMeta(0);
+          const bar = meta.data[i];
+          ctx.fillText("ICS = " + ics[i].toLocaleString(), bar.x, bar.y - 8);
+        });
+        ctx.restore();
+      },
+    }],
+  });
+
+  const ratioChart = new Chart(document.getElementById("ratioChart"), {
+    type: "bar",
+    data: {
+      labels: cities,
+      datasets: [{
+        label: "EVs per Capacity Unit",
+        data: ratio,
+        backgroundColor: ratioColors,
+        borderRadius: 4,
+        maxBarThickness: 70,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.parsed.x.toFixed(2) + " EVs per capacity unit" } },
+      },
+      scales: {
+        x: { beginAtZero: true, title: { display: true, text: "EVs per Infrastructure Capacity Unit" }, grid: { color: "rgba(0,0,0,.06)" } },
+        y: { grid: { display: false } },
+      },
+    },
+    plugins: [{
+      id: "ratioLabels",
+      afterDatasetsDraw(c) {
+        const { ctx } = c; ctx.save(); ctx.font = "600 11px Segoe UI, Arial"; ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "left";
+        c.data.datasets[0].data.forEach((v, i) => {
+          const bar = c.getDatasetMeta(0).data[i];
+          ctx.fillText(v.toFixed(2), bar.x + 8, bar.y + 4);
+        });
+        ctx.restore();
+      },
+    }],
+  });
+
+  function downloadChart(chart, name) {
+    const src = chart.canvas, tmp = document.createElement("canvas");
+    tmp.width = src.width; tmp.height = src.height;
+    const c = tmp.getContext("2d");
+    c.fillStyle = "#fff"; c.fillRect(0, 0, tmp.width, tmp.height); c.drawImage(src, 0, 0);
+    const a = document.createElement("a");
+    a.download = name; a.href = tmp.toDataURL("image/png"); a.click();
+  }
+  document.getElementById("dlIcs").onclick = () => downloadChart(icsChart, "ics_weighted_capacity.png");
+  document.getElementById("dlRatio").onclick = () => downloadChart(ratioChart, "evs_per_capacity_unit.png");
+</script>
+</body>
+</html>

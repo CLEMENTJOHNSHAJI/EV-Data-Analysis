@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV Chargers by City and Type</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6f8;
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+    .card {
+      background: var(--bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      padding: 28px 32px 20px;
+      width: min(960px, 100%);
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+      text-align: center;
+    }
+    p.subtitle {
+      margin: 0 0 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .chart-wrap { position: relative; height: 480px; }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+    button.secondary:hover { background: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Public EV Chargers by City and Connector Type</h1>
+    <p class="subtitle">Helsinki, Tampere and Oulu (Finland)</p>
+    <div class="chart-wrap">
+      <canvas id="chargerChart"></canvas>
+    </div>
+    <div class="controls">
+      <button id="downloadBtn">Download PNG</button>
+      <button id="logBtn" class="secondary">Toggle log scale</button>
+    </div>
+  </div>
+
+  <script>
+    const cities = ["Helsinki", "Tampere", "Oulu"];
+    const data = {
+      "Type 2": [2690, 975, 377],
+      "CHAdeMO": [40, 10, 14],
+      "CCS Fast": [391, 207, 134],
+    };
+    const colors = {
+      "Type 2": "#2563eb",
+      "CHAdeMO": "#f59e0b",
+      "CCS Fast": "#10b981",
+    };
+
+    const datasets = Object.keys(data).map((type) => ({
+      label: type + " Chargers",
+      data: data[type],
+      backgroundColor: colors[type],
+      borderRadius: 4,
+      maxBarThickness: 70,
+    }));
+
+    let logScale = false;
+
+    function makeScales() {
+      return {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 14, weight: "600" } },
+        },
+        y: {
+          type: logScale ? "logarithmic" : "linear",
+          beginAtZero: !logScale,
+          title: { display: true, text: "Number of chargers", font: { size: 13 } },
+          grid: { color: "rgba(0,0,0,0.06)" },
+        },
+      };
+    }
+
+    const chart = new Chart(document.getElementById("chargerChart"), {
+      type: "bar",
+      data: { labels: cities, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { position: "top", labels: { font: { size: 13 }, usePointStyle: true } },
+          title: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ctx.dataset.label + ": " + ctx.parsed.y.toLocaleString(),
+            },
+          },
+          datalabels: false,
+        },
+        scales: makeScales(),
+      },
+      plugins: [{
+        id: "valueLabels",
+        afterDatasetsDraw(c) {
+          const { ctx } = c;
+          ctx.save();
+          ctx.font = "600 11px Segoe UI, Arial";
+          ctx.fillStyle = "#1a1a1a";
+          ctx.textAlign = "center";
+          c.data.datasets.forEach((ds, i) => {
+            const meta = c.getDatasetMeta(i);
+            meta.data.forEach((bar, idx) => {
+              ctx.fillText(ds.data[idx].toLocaleString(), bar.x, bar.y - 6);
+            });
+          });
+          ctx.restore();
+        },
+      }],
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "ev_chargers_by_city.png";
+      const tmp = document.createElement("canvas");
+      const src = chart.canvas;
+      tmp.width = src.width;
+      tmp.height = src.height;
+      const tctx = tmp.getContext("2d");
+      tctx.fillStyle = "#ffffff";
+      tctx.fillRect(0, 0, tmp.width, tmp.height);
+      tctx.drawImage(src, 0, 0);
+      link.href = tmp.toDataURL("image/png");
+      link.click();
+    });
+
+    document.getElementById("logBtn").addEventListener("click", () => {
+      logScale = !logScale;
+      chart.options.scales = makeScales();
+      chart.update();
+    });
+  </script>
+</body>
+</html>

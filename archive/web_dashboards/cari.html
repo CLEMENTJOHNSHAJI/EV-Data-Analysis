@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Climate-Adjusted Readiness Index (CARI)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #1a1a1a; background: #f4f6f8; padding: 28px 16px; }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08); padding: 24px 28px; margin-bottom: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 0 0 4px; }
+    p.sub { margin: 0 0 14px; color: #555; font-size: 13px; }
+    .chart-wrap { position: relative; height: 360px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 12px; }
+    th, td { border: 1px solid #e2e6ea; padding: 6px 8px; text-align: right; }
+    th { background: #f0f3f6; }
+    td:first-child, th:first-child { text-align: left; }
+    .rank1 { color: #16a34a; font-weight: 600; }
+    .controls { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Climate-Adjusted Readiness Index (CARI)</h1>
+    <p class="sub">
+      <strong>CARI</strong> = ICS / (Total EV Fleet × Climate Factor) &nbsp;|&nbsp;
+      Higher value = stronger climate-adjusted charging readiness
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>CARI Ranking by Municipality</h2>
+    <p class="sub">Municipalities ranked by climate-adjusted charging readiness.</p>
+    <div class="chart-wrap"><canvas id="cariChart"></canvas></div>
+    <table>
+      <thead>
+        <tr><th>Rank</th><th>City</th><th>EV Fleet</th><th>ICS</th><th>Climate Factor</th><th>Adjusted Demand</th><th>CARI</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="rank1">1</td><td>Tampere</td><td>16,258</td><td>2,040</td><td>1.30</td><td>21,135</td><td>0.0965</td></tr>
+        <tr><td>2</td><td>Helsinki</td><td>58,516</td><td>4,765</td><td>1.26</td><td>73,730</td><td>0.0646</td></tr>
+        <tr><td>3</td><td>Oulu</td><td>13,037</td><td>1,089</td><td>1.45</td><td>18,904</td><td>0.0576</td></tr>
+      </tbody>
+    </table>
+    <div class="controls">
+      <button id="dlCari">Download CARI chart PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cities = ["Tampere", "Helsinki", "Oulu"];
+  const cari = [0.0965, 0.0646, 0.0576];
+  const cariColors = ["#16a34a", "#f97316", "#dc2626"];
+
+  const cariChart = new Chart(document.getElementById("cariChart"), {
+    type: "bar",
+    data: {
+      labels: cities.map((c, i) => "#" + (i + 1) + "  " + c),
+      datasets: [{ label: "CARI", data: cari, backgroundColor: cariColors, borderRadius: 4, maxBarThickness: 50 }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => "CARI: " + c.parsed.x.toFixed(4) } } },
+      scales: {
+        x: { min: 0, max: 0.11, title: { display: true, text: "Climate-Adjusted Readiness Index (CARI)" }, grid: { color: "rgba(0,0,0,.06)" } },
+        y: { grid: { display: false } },
+      },
+    },
+    plugins: [{
+      id: "cariLabels",
+      afterDatasetsDraw(c) {
+        const { ctx } = c; ctx.save(); ctx.font = "600 11px Segoe UI, Arial"; ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "left";
+        c.data.datasets[0].data.forEach((v, i) => {
+          const bar = c.getDatasetMeta(0).data[i];
+          ctx.fillText(v.toFixed(4), bar.x + 8, bar.y + 4);
+        });
+        ctx.restore();
+      },
+    }],
+  });
+
+  function downloadChart(chart, name) {
+    const src = chart.canvas, tmp = document.createElement("canvas");
+    tmp.width = src.width; tmp.height = src.height;
+    const c = tmp.getContext("2d");
+    c.fillStyle = "#fff"; c.fillRect(0, 0, tmp.width, tmp.height); c.drawImage(src, 0, 0);
+    const a = document.createElement("a");
+    a.download = name; a.href = tmp.toDataURL("image/png"); a.click();
+  }
+  document.getElementById("dlCari").onclick = () => downloadChart(cariChart, "cari_ranking.png");
+</script>
+</body>
+</html>

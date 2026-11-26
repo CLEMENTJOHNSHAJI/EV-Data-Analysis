@@ -1,0 +1,4 @@
+City,Total EV Fleet,ICS,Climate Factor,Climate Adjusted Demand,CARI,Rank,Calculation
+Tampere,16258,2040,1.30,21135.40,0.0965,1,2040 / (16258 x 1.30) = 0.0965
+Helsinki,58516,4765,1.26,73730.16,0.0646,2,4765 / (58516 x 1.26) = 0.0646
+Oulu,13037,1089,1.45,18903.65,0.0576,3,1089 / (13037 x 1.45) = 0.0576

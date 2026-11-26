@@ -1,0 +1,28 @@
+﻿City,Projection form,Cumulative 2030,Increase vs 2025 (%)
+Helsinki,"Linear trend, annual increase 2013-2025, anchored at 2025 (used)",113891,110.2
+Helsinki,"Linear trend, cumulative OLS 2020-2025 (draft)",97355,79.7
+Helsinki,"Linear trend, cumulative OLS 2013-2025, trend value at 2030",64500,19.0
+Helsinki,"Linear trend, cumulative OLS 2013-2025 slope, anchored at 2025",76228,40.7
+Helsinki,"Linear trend of YoY % growth 2013-2025, compounded (rejected)",6421,-88.2
+Helsinki,"2025 rate held, rounded to 0.1 pp (used)",135962,150.9
+Helsinki,"2025 rate held, unrounded",136078,151.1
+Helsinki,2025 additions held (used),99757,84.1
+Helsinki,Log-linear fit 2020-2025 (draft Section 9.2 form),289287,433.9
+Tampere,"Linear trend, annual increase 2013-2025, anchored at 2025 (used)",27035,77.1
+Tampere,"Linear trend, cumulative OLS 2020-2025 (draft)",26400,72.9
+Tampere,"Linear trend, cumulative OLS 2013-2025, trend value at 2030",20049,31.3
+Tampere,"Linear trend, cumulative OLS 2013-2025 slope, anchored at 2025",21961,43.8
+Tampere,"Linear trend of YoY % growth 2013-2025, compounded (rejected)",1868,-87.8
+Tampere,"2025 rate held, rounded to 0.1 pp (used)",27882,82.6
+Tampere,"2025 rate held, unrounded",27846,82.4
+Tampere,2025 additions held (used),23913,56.6
+Tampere,Log-linear fit 2020-2025 (draft Section 9.2 form),55021,260.4
+Oulu,"Linear trend, annual increase 2013-2025, anchored at 2025 (used)",21821,76.2
+Oulu,"Linear trend, cumulative OLS 2020-2025 (draft)",21293,72.0
+Oulu,"Linear trend, cumulative OLS 2013-2025, trend value at 2030",16358,32.1
+Oulu,"Linear trend, cumulative OLS 2013-2025 slope, anchored at 2025",17852,44.2
+Oulu,"Linear trend of YoY % growth 2013-2025, compounded (rejected)",1869,-84.9
+Oulu,"2025 rate held, rounded to 0.1 pp (used)",22414,81.0
+Oulu,"2025 rate held, unrounded",22387,80.8
+Oulu,2025 additions held (used),19298,55.8
+Oulu,Log-linear fit 2020-2025 (draft Section 9.2 form),43271,249.4

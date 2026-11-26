@@ -1,0 +1,52 @@
+﻿City,Year,BEV,PHEV petrol,PHEV diesel,PHEV total,Additions (BEV+PHEV),Cumulative fleet,Year status
+Helsinki,2010,1,0,0,0,1,1,complete
+Helsinki,2011,1,0,0,0,1,2,complete
+Helsinki,2012,3,48,1,49,52,54,complete
+Helsinki,2013,9,85,40,125,134,188,complete
+Helsinki,2014,40,126,22,148,188,376,complete
+Helsinki,2015,37,370,21,391,428,804,complete
+Helsinki,2016,76,639,33,672,748,1552,complete
+Helsinki,2017,129,1087,28,1115,1244,2796,complete
+Helsinki,2018,217,1342,30,1372,1589,4385,complete
+Helsinki,2019,624,1418,53,1471,2095,6480,complete
+Helsinki,2020,1252,3294,178,3472,4724,11204,complete
+Helsinki,2021,2930,4208,143,4351,7281,18485,complete
+Helsinki,2022,4229,3180,87,3267,7496,25981,complete
+Helsinki,2023,6592,4008,52,4060,10652,36633,complete
+Helsinki,2024,5368,3021,51,3072,8440,45073,complete
+Helsinki,2025,6410,2683,21,2704,9114,54187,complete
+Helsinki,2026,3490,832,7,839,4329,58516,partial (workbook updated 2026-07-07)
+Tampere,2010,0,0,0,0,0,0,complete
+Tampere,2011,3,1,0,1,4,4,complete
+Tampere,2012,4,31,0,31,35,39,complete
+Tampere,2013,9,55,21,76,85,124,complete
+Tampere,2014,16,53,16,69,85,209,complete
+Tampere,2015,32,175,11,186,218,427,complete
+Tampere,2016,52,273,14,287,339,766,complete
+Tampere,2017,72,421,10,431,503,1269,complete
+Tampere,2018,120,518,11,529,649,1918,complete
+Tampere,2019,289,480,28,508,797,2715,complete
+Tampere,2020,528,1281,64,1345,1873,4588,complete
+Tampere,2021,1073,1377,56,1433,2506,7094,complete
+Tampere,2022,1415,925,21,946,2361,9455,complete
+Tampere,2023,1587,798,15,813,2400,11855,complete
+Tampere,2024,1049,616,19,635,1684,13539,complete
+Tampere,2025,1137,582,10,592,1729,15268,complete
+Tampere,2026,805,185,3,188,993,16261,partial (workbook updated 2026-07-07)
+Oulu,2010,0,0,0,0,0,0,complete
+Oulu,2011,2,0,0,0,2,2,complete
+Oulu,2012,4,24,0,24,28,30,complete
+Oulu,2013,9,31,23,54,63,93,complete
+Oulu,2014,14,41,13,54,68,161,complete
+Oulu,2015,22,111,9,120,142,303,complete
+Oulu,2016,31,212,15,227,258,561,complete
+Oulu,2017,71,311,25,336,407,968,complete
+Oulu,2018,108,387,9,396,504,1472,complete
+Oulu,2019,275,451,20,471,746,2218,complete
+Oulu,2020,505,1026,72,1098,1603,3821,complete
+Oulu,2021,926,1058,60,1118,2044,5865,complete
+Oulu,2022,1219,648,24,672,1891,7756,complete
+Oulu,2023,1297,584,14,598,1895,9651,complete
+Oulu,2024,910,426,13,439,1349,11000,complete
+Oulu,2025,925,448,10,458,1383,12383,complete
+Oulu,2026,541,115,0,115,656,13039,partial (workbook updated 2026-07-07)

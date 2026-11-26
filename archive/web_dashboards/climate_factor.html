@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Climate Severity Factor</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #1a1a1a; background: #f4f6f8; padding: 28px 16px; }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.08); padding: 24px 28px; margin-bottom: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 0 0 4px; }
+    p.sub { margin: 0 0 14px; color: #555; font-size: 13px; }
+    .chart-wrap { position: relative; height: 360px; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 12px; }
+    th, td { border: 1px solid #e2e6ea; padding: 6px 8px; text-align: right; }
+    th { background: #f0f3f6; }
+    td:first-child, th:first-child { text-align: left; }
+    .controls { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #6b7280; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Climate Severity Factor by Municipality</h1>
+    <p class="sub">
+      <strong>Climate Factor</strong> = 1 + |Average January Temperature| / 20 &nbsp;|&nbsp;
+      Higher value = more severe winter operating conditions
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>A. Average January Temperature (2010–2025)</h2>
+    <p class="sub">Input data: colder municipalities have lower (more negative) temperatures.</p>
+    <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h2>B. Climate Severity Factor</h2>
+    <p class="sub">Derived multiplier reflecting winter-related stress on EV usage and charging demand.</p>
+    <div class="chart-wrap"><canvas id="factorChart"></canvas></div>
+    <table>
+      <thead>
+        <tr><th>City</th><th>Avg January Temp</th><th>Calculation</th><th>Climate Factor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Helsinki</td><td>-5.15°C</td><td>1 + 5.15 / 20</td><td>1.26</td></tr>
+        <tr><td>Tampere</td><td>-5.98°C</td><td>1 + 5.98 / 20</td><td>1.30</td></tr>
+        <tr><td>Oulu</td><td>-8.90°C</td><td>1 + 8.90 / 20</td><td>1.45</td></tr>
+      </tbody>
+    </table>
+    <div class="controls">
+      <button id="dlTemp">Download temperature chart PNG</button>
+      <button id="dlFactor" class="secondary">Download climate factor chart PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cities = ["Helsinki", "Tampere", "Oulu"];
+  const temp = [-5.15, -5.98, -8.90];
+  const factor = [1.26, 1.30, 1.45];
+  const tempColors = ["#3b82f6", "#2563eb", "#1d4ed8"];
+  const factorColors = ["#fb923c", "#f97316", "#ea580c"];
+
+  const tempChart = new Chart(document.getElementById("tempChart"), {
+    type: "bar",
+    data: {
+      labels: cities,
+      datasets: [{ label: "Avg January Temperature (°C)", data: temp, backgroundColor: tempColors, borderRadius: 4, maxBarThickness: 70 }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.parsed.y.toFixed(2) + " °C" } } },
+      scales: {
+        x: { grid: { display: false }, title: { display: true, text: "City" } },
+        y: { title: { display: true, text: "Average January temperature (°C)" }, grid: { color: "rgba(0,0,0,.06)" } },
+      },
+    },
+    plugins: [{
+      id: "tempLabels",
+      afterDatasetsDraw(c) {
+        const { ctx } = c; ctx.save(); ctx.font = "600 11px Segoe UI, Arial"; ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
+        c.data.datasets[0].data.forEach((v, i) => {
+          const bar = c.getDatasetMeta(0).data[i];
+          ctx.fillText(v.toFixed(2) + " °C", bar.x, bar.y + (v < 0 ? 16 : -8));
+        });
+        ctx.restore();
+      },
+    }],
+  });
+
+  const factorChart = new Chart(document.getElementById("factorChart"), {
+    type: "bar",
+    data: {
+      labels: cities,
+      datasets: [{ label: "Climate Factor", data: factor, backgroundColor: factorColors, borderRadius: 4, maxBarThickness: 70 }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => "Climate Factor: " + c.parsed.x.toFixed(2) } } },
+      scales: {
+        x: { min: 1.0, max: 1.5, title: { display: true, text: "Climate Factor" }, grid: { color: "rgba(0,0,0,.06)" } },
+        y: { grid: { display: false } },
+      },
+    },
+    plugins: [{
+      id: "factorLabels",
+      afterDatasetsDraw(c) {
+        const { ctx } = c; ctx.save(); ctx.font = "600 11px Segoe UI, Arial"; ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "left";
+        const calcs = ["1 + 5.15/20", "1 + 5.98/20", "1 + 8.90/20"];
+        c.data.datasets[0].data.forEach((v, i) => {
+          const bar = c.getDatasetMeta(0).data[i];
+          ctx.fillText(v.toFixed(2) + "  (" + calcs[i] + ")", bar.x + 8, bar.y + 4);
+        });
+        ctx.restore();
+      },
+    }],
+  });
+
+  function downloadChart(chart, name) {
+    const src = chart.canvas, tmp = document.createElement("canvas");
+    tmp.width = src.width; tmp.height = src.height;
+    const c = tmp.getContext("2d");
+    c.fillStyle = "#fff"; c.fillRect(0, 0, tmp.width, tmp.height); c.drawImage(src, 0, 0);
+    const a = document.createElement("a");
+    a.download = name; a.href = tmp.toDataURL("image/png"); a.click();
+  }
+  document.getElementById("dlTemp").onclick = () => downloadChart(tempChart, "climate_january_temperature.png");
+  document.getElementById("dlFactor").onclick = () => downloadChart(factorChart, "climate_factor_score.png");
+</script>
+</body>
+</html>

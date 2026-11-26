@@ -1,0 +1,37 @@
+﻿Table,City,Item,Draft value,Recomputed,Difference,Status
+Draft Tables 8-9,Helsinki,Cumulative 2025,54187,54187,0,match
+Draft Tables 8-9,Helsinki,Linear 2030 (draft OLS 2020-2025),97355,97355.2381,0.2381,match
+Draft Tables 8-9,Helsinki,2025 rate held to 2030,135962,135961.96912,-0.03088,match
+Draft Tables 8-9,Helsinki,"Scaled stock, linear",105133,105132.69197,-0.30803,match
+Draft Tables 8-9,Helsinki,"Scaled stock, 2025 rate",146824,146824.00561,0.00561,match
+Draft Tables 8-9,Helsinki,Current CARI,0.0646,0.06463,3e-05,match
+Draft Tables 8-9,Helsinki,"Future CARI, linear",0.036,0.03597,-3e-05,match
+Draft Tables 8-9,Helsinki,"Change (%), linear",-44.3,-44.34081,-0.04081,match
+Draft Tables 8-9,Helsinki,"Future CARI, 2025 rate",0.0258,0.02576,-4e-05,match
+Draft Tables 8-9,Helsinki,"Change (%), 2025 rate",-60.1,-60.14548,-0.04548,match
+Draft Tables 8-9,Helsinki,January mean (deg C),-5.15,-5.04118,0.10882,DIFFERENT
+Draft Tables 8-9,Helsinki,Climate factor,1.26,1.25,-0.01,DIFFERENT
+Draft Tables 8-9,Tampere,Cumulative 2025,15268,15268,0,match
+Draft Tables 8-9,Tampere,Linear 2030 (draft OLS 2020-2025),26400,26400.19048,0.19048,match
+Draft Tables 8-9,Tampere,2025 rate held to 2030,27882,27882.23925,0.23925,match
+Draft Tables 8-9,Tampere,"Scaled stock, linear",28112,28111.81556,-0.18444,match
+Draft Tables 8-9,Tampere,"Scaled stock, 2025 rate",29690,29689.91066,-0.08934,match
+Draft Tables 8-9,Tampere,Current CARI,0.0965,0.09652,2e-05,match
+Draft Tables 8-9,Tampere,"Future CARI, linear",0.0558,0.05582,2e-05,match
+Draft Tables 8-9,Tampere,"Change (%), linear",-42.2,-42.16667,0.03333,match
+Draft Tables 8-9,Tampere,"Future CARI, 2025 rate",0.0529,0.05285,-5e-05,match
+Draft Tables 8-9,Tampere,"Change (%), 2025 rate",-45.2,-45.24066,-0.04066,match
+Draft Tables 8-9,Tampere,January mean (deg C),-5.98,-6.19412,-0.21412,DIFFERENT
+Draft Tables 8-9,Tampere,Climate factor,1.3,1.31,0.01,DIFFERENT
+Draft Tables 8-9,Oulu,Cumulative 2025,12383,12383,0,match
+Draft Tables 8-9,Oulu,Linear 2030 (draft OLS 2020-2025),21293,21293.38095,0.38095,match
+Draft Tables 8-9,Oulu,2025 rate held to 2030,22414,22413.92041,-0.07959,match
+Draft Tables 8-9,Oulu,"Scaled stock, linear",22418,22417.57579,-0.42421,match
+Draft Tables 8-9,Oulu,"Scaled stock, 2025 rate",23598,23597.78067,-0.21933,match
+Draft Tables 8-9,Oulu,Current CARI,0.0576,0.05761,1e-05,match
+Draft Tables 8-9,Oulu,"Future CARI, linear",0.0335,0.0335,0.0,match
+Draft Tables 8-9,Oulu,"Change (%), linear",-41.8,-41.84474,-0.04474,match
+Draft Tables 8-9,Oulu,"Future CARI, 2025 rate",0.0318,0.03183,3e-05,match
+Draft Tables 8-9,Oulu,"Change (%), 2025 rate",-44.8,-44.75328,0.04672,match
+Draft Tables 8-9,Oulu,January mean (deg C),-8.9,-8.91875,-0.01875,DIFFERENT
+Draft Tables 8-9,Oulu,Climate factor,1.45,1.45,0.0,match
