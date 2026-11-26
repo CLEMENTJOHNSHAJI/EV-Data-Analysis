@@ -81,8 +81,6 @@ python src/make_map_composite.py   # composite map figure (needs Pillow)
 | 7 | `07_plot_cari.py` | all of the above | CARI charts; `data/processed/cari.csv` |
 | 8 | `08_projection_tables.py` | registration, FMI and charger data | 14 CSV tables in `outputs/tables/` (projections, sensitivities, checks) |
 | 9 | `09_plot_cumulative_fleet_2030.py` | `outputs/tables/` | `outputs/figures/analysis/cumulative_ev_fleet_2030.png` |
-| thesis | `generate_figures.py` | `data/processed/` | `outputs/figures/thesis/figure_01…10`; `outputs/tables/forecast_2030.csv`, `future_cari_2030.csv` |
-| thesis | `make_map_composite.py` | `outputs/figures/thesis/figure_map_*` | `outputs/figures/thesis/figure_map_composite.png` |
 
 ## Definitions
 
