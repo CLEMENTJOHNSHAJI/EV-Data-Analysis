@@ -8,7 +8,6 @@ This project computes the Climate-Adjusted Readiness Index (CARI) for three Finn
 Appendix_Submission/
 ├── README.md                  this file
 ├── requirements.txt           Python packages
-├── run_all.py                 runs the pipeline, scripts 00-09, in order
 ├── src/                       analysis code
 │   ├── 00_clean_inputs.py ... 09_plot_cumulative_fleet_2030.py
 │   ├── ev_utils.py            shared loaders, cleaning rules, formulas, plot style
